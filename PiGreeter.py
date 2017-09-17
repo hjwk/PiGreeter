@@ -1,26 +1,44 @@
 """ Main file of the project"""
-import cv2
-import numpy as np
-import pyaudio
 import wave
+
+import cv2
+import pyaudio
+
+def detect_faces(grayscale, cascade):
+    "Detects faces using a haarcascade in a grayscale image"
+    return cascade.detectMultiScale(
+        grayscale,
+        scaleFactor=1.2,
+        minNeighbors=5
+    )
+
+def draw_faces(faces, img):
+    "Draws rectanges around faces "
+    for (x, y, w, h) in faces:
+        cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
 CHUNK = 1024
 
 if __name__ == "__main__":
-    """ main    
+    """ main
+    The flow of this program will be the following:
+        1. Grab a frame from the webcam
+        2. Detect faces in the frame (haarcascade)
+        3. Preprocess faces (histogram equalization)
+        4. Recognize faces (eigenvalues ?)
+        5. Output appropriate greeting (pyaudio)
     """
 
     cap = cv2.VideoCapture("faceDetection.mp4")
-    faceCascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-    #profileCascade = cv2.CascadeClassifier('haarcascade_profileface.xml')
+    face_cascade = cv2.CascadeClassifier('haarcascade/haarcascade_frontalface_default.xml')
 
-    wf = wave.open("speech.wav", 'rb')
+    wf = wave.open("audio/speech.wav", 'rb')
     p = pyaudio.PyAudio()
 
     stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
-                channels=wf.getnchannels(),
-                rate=wf.getframerate(),
-                output=True)
+                    channels=wf.getnchannels(),
+                    rate=wf.getframerate(),
+                    output=True)
 
     data = wf.readframes(CHUNK)
 
@@ -33,37 +51,21 @@ if __name__ == "__main__":
 
     p.terminate()
 
-    while(True):
+    while True:
         ret, frame = cap.read()
-        if (ret is False):
+        if ret is False:
             print("End of file")
             break
         else:
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        
-        faces = faceCascade.detectMultiScale(
-            gray,
-            scaleFactor=1.2,
-            minNeighbors=5
-        )
 
-        for (x,y,w,h) in faces:
-            cv2.rectangle(frame, (x,y), (x+w,y+h), (255,0,0), 2)
-
-        # Profile detection - does not work with sample video
-        # profiles = profileCascade.detectMultiScale(
-        #     gray,
-        #     scaleFactor=1.2,
-        #     minNeighbors=5
-        # )
-
-        # for (x,y,w,h) in profiles:
-        #     cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
+        faces = detect_faces(gray, face_cascade)
+        draw_faces(faces, frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
         cv2.imshow("Video", frame)
-        
+
     cap.release()
     cv2.destroyAllWindows()
