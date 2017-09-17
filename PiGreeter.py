@@ -1,7 +1,9 @@
 """ Main file of the project"""
 import wave
 
+import numpy as np
 import cv2
+import cv2.face as face
 import pyaudio
 
 def detect_faces(grayscale, cascade):
@@ -13,11 +15,13 @@ def detect_faces(grayscale, cascade):
     )
 
 def draw_faces(faces, img):
-    "Draws rectanges around faces "
+    "Draws rectanges around faces"
     for (x, y, w, h) in faces:
         cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
-CHUNK = 1024
+def load_images():
+    "Loads images for the recognizer module"
+    pass
 
 if __name__ == "__main__":
     """ main
@@ -25,12 +29,13 @@ if __name__ == "__main__":
         1. Grab a frame from the webcam
         2. Detect faces in the frame (haarcascade)
         3. Preprocess faces (histogram equalization)
-        4. Recognize faces (eigenvalues ?)
-        5. Output appropriate greeting (pyaudio)
+        4. Recognize faces (LBPH)
+        5. Output appropriate greeting (pyaudio ? espeek ?)
     """
-
+    print(help(cv2.face))
     cap = cv2.VideoCapture("faceDetection.mp4")
-    face_cascade = cv2.CascadeClassifier('haarcascade/haarcascade_frontalface_default.xml')
+    face_cascade = cv2.CascadeClassifier('haarcascades/haarcascade_frontalface_default.xml')
+    recognizer = face.createLBPHFaceRecognizer()
 
     wf = wave.open("audio/speech.wav", 'rb')
     p = pyaudio.PyAudio()
@@ -40,11 +45,11 @@ if __name__ == "__main__":
                     rate=wf.getframerate(),
                     output=True)
 
-    data = wf.readframes(CHUNK)
+    data = wf.readframes(1024)
 
     while len(data) > 0:
         stream.write(data)
-        data = wf.readframes(CHUNK)
+        data = wf.readframes(1024)
 
     stream.stop_stream()
     stream.close()
