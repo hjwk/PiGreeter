@@ -31,7 +31,9 @@ def load_images_labels(path, cascade):
     personName = ""
     for image_path in images_paths:
         img = cv2.imread(image_path)
-        if os.path.split(image_path)[1].split('_')[0] != personName:
+        newPerson = os.path.split(image_path)[1].split('_')[0]
+        if newPerson != personName:
+            personName = newPerson
             label = label + 1
         #label = int( re.findall(r'\d+', os.path.split(image_path)[1]) )
         faces = detect_faces(cascade, img)
@@ -43,6 +45,7 @@ def load_images_labels(path, cascade):
             cv2.imshow("Adding faces to training set...", image_resized)
             cv2.waitKey(500)
 
+    cv2.destroyAllWindows()
     return images, labels
 
 def process_faces(faces, img):
@@ -62,7 +65,17 @@ def draw_faces(faces, img):
 def recognize_faces(faces, recognizer, frame):
     "Recognize faces in a list and reacts"
     for (x, y , w, h) in faces:
-        nbr_predicted, conf = recognizer.predict(frame[y:y+h, x:x+h])
+        nbr_predicted = recognizer.predict(frame[y:y + h, x:x + h])
+        if nbr_predicted == 0:
+            print("Axel")
+        elif nbr_predicted == 1:
+            print("Delphine")
+        elif nbr_predicted == 2:
+            print("Guillaume")
+        elif nbr_predicted == 3:
+            print("Hubert")
+        else:
+            print("Oups")
 
 if __name__ == "__main__":
     """ main
@@ -102,7 +115,7 @@ if __name__ == "__main__":
         draw_faces(faces, frame)
 
         # Recognize !
-        recognize_faces(faces, recognizer, frame)
+        recognize_faces(faces, recognizer, gray)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
