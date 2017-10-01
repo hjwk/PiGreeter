@@ -1,6 +1,11 @@
 import cv2
 
-def drawString(img, text, coord, color, fontScale, fontFace, thickness):
+def draw_faces(faces, img):
+    "Draws rectanges around faces"
+    for (x, y, w, h) in faces:
+        cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
+
+def drawString(text, img, coord, color, fontScale, fontFace, thickness):
     
     # Get the text size & baseline.
     textSize, baseline = cv2.getTextSize(text, fontFace, fontScale, thickness)

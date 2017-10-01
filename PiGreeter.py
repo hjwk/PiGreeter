@@ -24,7 +24,6 @@ def detect_faces(cascade, grayscale):
 
 def load_images_labels(path, cascade):
     "Loads images from dataset"
-
     images_paths = [os.path.join(path, f) for f in os.listdir(path)]
 
     images = []
@@ -46,30 +45,24 @@ def load_images_labels(path, cascade):
             images.append(image_resized)
             labels.append(label)
             cv2.imshow("Adding faces to training set...", image_resized)
-            cv2.waitKey(500)
+            cv2.waitKey(50)
 
     cv2.destroyAllWindows()
     return images, labels, names
 
 def process_faces(faces, img):
     "Crops image to separates faces"
-    i = 0
     f = []
     for (x, y, w, h) in faces:
         f.append( img[y:y + h, x:x + w] )
     
     return f
 
-def draw_faces(faces, img):
-    "Draws rectanges around faces"
-    for (x, y, w, h) in faces:
-        cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
-
 def recognize_faces(faces, recognizer, frame):
     "Recognize faces in a list and reacts"
-    nbr_predicted = -1
-    for (x, y , w, h) in faces:
-        nbr_predicted = recognizer.predict(frame[y:y + h, x:x + h])
+    nbr_predicted = []
+    for (x, y, w, h) in faces:
+        nbr_predicted.append(recognizer.predict(frame[y:y + h, x:x + h]))
  
     return nbr_predicted
 
@@ -114,7 +107,7 @@ if __name__ == "__main__":
     while True:
         ret, frame = cap.read()
         if ret is False:
-            print("End of file")
+            print("End of file/Camera not found")
             break
         else:
             if 3 == len(frame.shape):
@@ -125,19 +118,19 @@ if __name__ == "__main__":
                 gray = frame
         
         # Draw gui
-        gui.drawString(frame, "MODE: Detection", (0, -20), (10, 10, 250), 1.1, cv2.FONT_HERSHEY_COMPLEX, 1)
+        gui.drawString("MODE: Detection", frame, (0, -20), (10, 10, 250), 1.1, cv2.FONT_HERSHEY_COMPLEX, 1)
 
         # Histogram equalization - consider using CLAHE if does not work well
         gray = cv2.equalizeHist(gray)
 
         # Add flag to only look for one face at a time ? 
         faces = detect_faces(face_cascade, gray)
-        draw_faces(faces, frame)
+        gui.draw_faces(faces, frame)
 
         # Recognize !
-        nbr = recognize_faces(faces, recognizer, gray)
-        if nbr >= 0:
-            gui.drawString(frame, "Recognized " + names[nbr], (0, -5), (20, 20, 240), 1, cv2.FONT_HERSHEY_COMPLEX, 1)
+        nbrs = recognize_faces(faces, recognizer, gray)
+        for nbr in nbrs: 
+            gui.drawString("Recognized " + names[nbr], frame, (0, -5), (50, 50, 200), 0.6, cv2.FONT_HERSHEY_COMPLEX, 1)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             recognizer.save("trainedModel.yml")
