@@ -8,6 +8,8 @@ import os
 import re
 #import pyaudio
 
+import gui
+
 def detect_eyes(cascade, grayscale):
     "Detects eyes in a grayscale image"
     pass
@@ -27,6 +29,7 @@ def load_images_labels(path, cascade):
 
     images = []
     labels = []
+    names = []
     label = -1
     personName = ""
     for image_path in images_paths:
@@ -34,8 +37,8 @@ def load_images_labels(path, cascade):
         newPerson = os.path.split(image_path)[1].split('_')[0]
         if newPerson != personName:
             personName = newPerson
+            names.append(personName)
             label = label + 1
-        #label = int( re.findall(r'\d+', os.path.split(image_path)[1]) )
         faces = detect_faces(cascade, img)
         for (x, y, w, h) in faces:
             image_resized = cv2.resize( img[y: y + h, x: x + w], (128, 128) )
@@ -46,7 +49,7 @@ def load_images_labels(path, cascade):
             cv2.waitKey(500)
 
     cv2.destroyAllWindows()
-    return images, labels
+    return images, labels, names
 
 def process_faces(faces, img):
     "Crops image to separates faces"
@@ -64,18 +67,26 @@ def draw_faces(faces, img):
 
 def recognize_faces(faces, recognizer, frame):
     "Recognize faces in a list and reacts"
+    nbr_predicted = -1
     for (x, y , w, h) in faces:
         nbr_predicted = recognizer.predict(frame[y:y + h, x:x + h])
-        if nbr_predicted == 0:
-            print("Axel")
-        elif nbr_predicted == 1:
-            print("Delphine")
-        elif nbr_predicted == 2:
-            print("Guillaume")
-        elif nbr_predicted == 3:
-            print("Hubert")
-        else:
-            print("Oups")
+ 
+    return nbr_predicted
+
+def load_names():
+    "Loads people's names from the names.yml file"
+    with open('names.yml') as f:
+        names = f.read().splitlines()
+
+    return names
+
+def save_names(names):
+    "Saves people's names in a .yml file to be loaded later"
+    namesFile = open("names.yml", 'w')
+    for name in names:
+        namesFile.write(name + '\n')
+    
+    namesFile.close()
 
 if __name__ == "__main__":
     """ main
@@ -90,9 +101,15 @@ if __name__ == "__main__":
     face_cascade = cv2.CascadeClassifier('haarcascades/haarcascade_frontalface_default.xml')
     recognizer = face.createLBPHFaceRecognizer()
 
-    # Train
-    images, labels = load_images_labels("./trainingData", face_cascade)
-    recognizer.train( images, np.array(labels) )
+    # Load model or train it
+    try:
+        print("Loading existing model")
+        recognizer.load("trainedModel.yml")
+        names = load_names()
+    except:
+        print("Training model from photos")
+        images, labels, names = load_images_labels("./trainingData", face_cascade)
+        recognizer.train( images, np.array(labels) )
 
     while True:
         ret, frame = cap.read()
@@ -107,6 +124,9 @@ if __name__ == "__main__":
             else:
                 gray = frame
         
+        # Draw gui
+        gui.drawString(frame, "MODE: Detection", (0, -20), (10, 10, 250), 1.1, cv2.FONT_HERSHEY_COMPLEX, 1)
+
         # Histogram equalization - consider using CLAHE if does not work well
         gray = cv2.equalizeHist(gray)
 
@@ -115,12 +135,16 @@ if __name__ == "__main__":
         draw_faces(faces, frame)
 
         # Recognize !
-        recognize_faces(faces, recognizer, gray)
+        nbr = recognize_faces(faces, recognizer, gray)
+        if nbr >= 0:
+            gui.drawString(frame, "Recognized " + names[nbr], (0, -5), (20, 20, 240), 1, cv2.FONT_HERSHEY_COMPLEX, 1)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
+            recognizer.save("trainedModel.yml")
+            save_names(names)
             break
 
-        cv2.imshow("Video", frame)
+        cv2.imshow("PiGreeter", frame)
 
     cap.release()
     cv2.destroyAllWindows()
