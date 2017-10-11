@@ -40,7 +40,7 @@ unzip opencv_contrib.zip
 ```
 
 ### Step 3 - Compiling
-Switch to the virtual environment of your choice. Move to the directory of OpenCV your just created by unzipping
+Switch to the virtual environment of your choice. Move to the directory of OpenCV you just created by unzipping
 ```
 cd opencv
 mkdir build
@@ -65,3 +65,5 @@ ls -l /usr/local/lib/python3.5/site-packages/
 total 1852
 -rw-r--r-- 1 root staff 1895932 Mar 20 21:51 cv2.cpython-34m.so
 ```
+## License
+This hobby project is licensed under the MIT license. See [LICENSE.md](LICENSE.md) for details.
