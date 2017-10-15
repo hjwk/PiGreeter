@@ -50,17 +50,18 @@ if __name__ == "__main__":
         # Draw gui
         gui.drawString("MODE: Detection", frame, (0, -20), (10, 10, 250), 1.1, cv2.FONT_HERSHEY_COMPLEX, 1)
 
-        # Histogram equalization - consider using CLAHE if does not work well
-        gray = cv2.equalizeHist(gray)
+        if 0 == int(cap.get(cv2.CAP_PROP_POS_FRAMES)) % 10:
+            # Histogram equalization - consider using CLAHE if does not work well
+            gray = cv2.equalizeHist(gray)
 
-        # Add flag to only look for one face at a time ? 
-        faces = processing.detect_faces(face_cascade, gray)
-        gui.draw_faces(faces, frame)
+            # Add flag to only look for one face at a time ? 
+            faces = processing.detect_faces(face_cascade, gray)
+            gui.draw_faces(faces, frame)
 
-        # Recognize !
-        nbrs = processing.recognize_faces(faces, recognizer, gray)
-        for nbr in nbrs: 
-            gui.drawString("Recognized " + names[nbr], frame, (0, -5), (50, 50, 200), 0.6, cv2.FONT_HERSHEY_COMPLEX, 1)
+            # Recognize !
+            nbrs = processing.recognize_faces(faces, recognizer, gray)
+            for nbr in nbrs: 
+                gui.drawString("Recognized " + names[nbr], frame, (0, -5), (50, 50, 200), 0.6, cv2.FONT_HERSHEY_COMPLEX, 1)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             recognizer.save("trainedModel.yml")
