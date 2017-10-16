@@ -1,36 +1,41 @@
 # PiGreeter
 Short python project which should enable a raspberry Pi with a camera to recognize and greet people as they come into work in the morning.
 
-## How to install OpenCV on a Raspberry Pi
+## Pre-requisites
+For this code to work on a raspberry you will need:
+- A webcam (this project uses the Logitech c270).
+- Python (this project assumes Python 3).
+- OpenCV (this project uses OpenCV 3.2.0, some python bindinds may change if you use another version).
+### Compiling and installing OpenCV on a Raspberry Pi
 Inspired by https://www.pyimagesearch.com/2017/09/04/raspbian-stretch-install-opencv-3-python-on-your-raspberry-pi/
-### Step 1 - Install dependencies
-#### Build essentials
+#### Step 1 - Install dependencies
+##### Build essentials
 OpenCV uses CMAKE to generates its makefiles.
 ```
 sudo apt-get install build-essential cmake pkg-config
 ```
-#### Image codecs
+##### Image codecs
 ```
 sudo apt-get install libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev
 ```
-#### Video codecs
+##### Video codecs
 ```
 sudo apt-get install libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev
 ```
-#### GTK
+##### GTK
 ```
 sudo apt-get install libgtk2.0-dev libgtk-3-dev
 ```
-#### Other
+##### Other
 These libs will optimise some of opencv operations.
 ```
 sudo apt-get install libatlas-base-dev gfortran
 ```
-#### Python headers
+##### Python headers
 ```
 sudo apt-get install python2.7-dev python3-dev
 ```
-### Step 2 - Download OpenCV
+#### Step 2 - Download OpenCV
 Move to the directory of your choice and download the source code of both OpenCV and OpenCV-contrib.
 ```
 wget -O opencv.zip https://github.com/Itseez/opencv/archive/3.1.0.zip
@@ -39,7 +44,7 @@ unzip opencv.zip
 unzip opencv_contrib.zip
 ```
 
-### Step 3 - Compiling
+#### Step 3 - Compiling
 Switch to the virtual environment of your choice. Move to the directory of OpenCV you just created by unzipping
 ```
 cd opencv
@@ -52,7 +57,7 @@ cmake -D CMAKE_BUILD_TYPE=RELEASE \
     -D BUILD_EXAMPLES=ON ..    
 make
 ```
-### Step 4 - Installation
+#### Step 4 - Installation
 Still in the same directory.
 ```
 sudo make install
