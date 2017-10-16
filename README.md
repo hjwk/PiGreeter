@@ -5,7 +5,7 @@ Short python project which should enable a raspberry Pi with a camera to recogni
 For this code to work on a raspberry you will need:
 - A webcam (this project uses the Logitech c270).
 - Python (this project assumes Python 3).
-- OpenCV (this project uses OpenCV 3.2.0, some python bindinds may change if you use another version).
+- OpenCV (this project uses OpenCV 3.2.0, some python bindings may change if you use another version).
 ### Compiling and installing OpenCV on a Raspberry Pi
 Inspired by https://www.pyimagesearch.com/2017/09/04/raspbian-stretch-install-opencv-3-python-on-your-raspberry-pi/
 #### Step 1 - Install dependencies
